@@ -1,33 +1,74 @@
 # 🚨 CivicSecure
-**Reliable Citizen Grievance & Safety Platform**
+**Citizen Information & Grievance Hub**
 
-CivicSecure is a lightweight, always-on grievance redressal app that ensures citizens can file complaints and safety alerts **anytime, anywhere — even when official apps fail**.  
-Built with **React + Node.js + PostgreSQL**, it focuses on **reliability, anonymity, and transparency**.
+CivicSecure is a resilient, always-on platform that empowers citizens to:  
+- Access **verified government info & disaster alerts**  
+- File **complaints and grievances** safely  
+- Get **chat/call support** from NGOs or call centers  
+- Participate in **community discussion channels**  
+- Ensure **genuine reporting** through optional Aadhaar verification  
+- Attach **verified documents via DigiLocker**  
+
+Built with **React + Node.js + Firebase + PostgreSQL**, CivicSecure focuses on **reliability, transparency, and citizen-first solutions**.
 
 ---
 
 ## ✨ Key Features
-- **Offline Queuing** → File complaints without internet, auto-sync later.  
-- **Multi-Channel Access** → Mobile App + SMS + WhatsApp fallback.  
-- **Anonymity by Choice** → Report safely without fear.  
-- **Tamper-Proof Logs** → Immutable audit trail + NGO oversight.  
-- **Future: DigiLocker Integration** → Attach verified govt documents easily.  
+
+### 1. Information Hub
+- Govt-verified info, schemes, and benefits  
+- Real-time disaster alerts (flood, earthquake, power outage)  
+- Categorized: Schemes | Safety Alerts | Health | Disaster Updates  
+
+### 2. Grievance/Complaint Module
+- File complaints **online, offline, or via SMS/WhatsApp**  
+- Anonymous or Aadhaar-verified options  
+- Status tracking (Submitted → In Review → Resolved)  
+- Immutable audit logs for transparency  
+
+### 3. Chat & Call Support
+- Citizen ↔ NGO / Call Center communication  
+- AI-assisted FAQ support  
+- Human escalation for urgent cases  
+
+### 4. Community Channels
+- Topic-based discussion threads (Women’s Safety, Civic Issues, Disaster Alerts, Schemes)  
+- Verified (Aadhaar) vs Anonymous posts  
+- NGO moderation + AI filtering for safety and spam  
+- Direct complaint filing from threads  
+
+### 5. Aadhaar Verification (Optional)
+- Aadhaar or VID-based verification for trust and authenticity  
+- Verified complaints marked as credible for faster action  
+- Anonymous mode still available for citizen safety  
+
+### 6. DigiLocker Integration (Future Phase)
+- Simplified interface for attaching verified government documents  
+- OAuth / VID login for secure access  
+- Files stored in Firebase Storage; links stored in complaint record  
+- Offline fallback for manual attachment if DigiLocker is unavailable  
+
+### 7. AI Roadmap
+- Detect spam or duplicate complaints  
+- Prioritize urgent issues (emergency classification)  
+- Moderate chat/images/videos automatically  
+- Highlight trending topics for NGOs and authorities  
 
 ---
 
-## 🎯 Why CivicSecure?
-Government service apps (like AP Police Seva) often go down, leaving citizens without access to essential services.  
-CivicSecure provides a **resilient, independent, and citizen-first platform** that protects against corruption and ensures accountability — complementing the **Digital India** mission.  
-
----
-
-## 🛠️ Tech Stack
-- **Frontend:** React  
+## 🛠 Tech Stack
+- **Frontend:** React (web + PWA) → future Flutter mobile app  
 - **Backend:** Node.js (Express/Fastify)  
-- **Database:** PostgreSQL (with Prisma/Sequelize ORM)  
-- **Storage:** Cloud storage (e.g., Firebase / S3) → video & images stored here, DB only keeps URLs  
-- **Messaging:** SMS Gateway, WhatsApp Business API  
+- **Database:** PostgreSQL (structured complaints + audit logs)  
+- **Realtime Data & Storage:** Firebase (chat, info hub, images/videos)  
+- **Push Notifications:** Firebase Cloud Messaging  
 - **Security:** End-to-End Encryption, Immutable Logs  
+
+---
+
+## 🔹 Frontend Strategy
+- **Phase 1:** React Web MVP for fast prototyping and hackathon demo  
+- **Phase 2:** Flutter Mobile App for iOS & Android, offline-first experience, and native push notifications  
 
 ---
 
@@ -38,9 +79,9 @@ CivicSecure provides a **resilient, independent, and citizen-first platform** th
 |----------------|-------------|------------------------------------------|
 | id             | UUID (PK)   | Unique complaint ID                      |
 | created_at     | TIMESTAMP   | Auto-generated                           |
-| category       | ENUM        | safety, theft, civic, etc.               |
+| category       | ENUM        | safety, theft, civic, disaster, etc.    |
 | description    | TEXT        | Complaint details                        |
-| attachments    | JSONB       | Array of file URLs                       |
+| attachments    | JSONB       | Array of Firebase file URLs              |
 | location       | TEXT        | GPS or address                           |
 | reporter_type  | ENUM        | anonymous / pseudonymous / verified      |
 | status         | ENUM        | submitted / forwarded / resolved         |
@@ -54,14 +95,48 @@ CivicSecure provides a **resilient, independent, and citizen-first platform** th
 | changed_by   | TEXT        | NGO / system / govt officer              |
 | timestamp    | TIMESTAMP   | Auto-generated                           |
 
+### users
+| Column             | Type        | Notes                                    |
+|-------------------|-------------|------------------------------------------|
+| id                 | UUID (PK)   | User ID                                  |
+| aadhaar_verified   | BOOLEAN     | True if verified via Aadhaar             |
+| aadhaar_reference  | TEXT        | Masked Aadhaar / UIDAI token             |
+| created_at         | TIMESTAMP   | Registration date                         |
+
+### info_hub (Firebase)
+| Field       | Type        | Notes                                      |
+|-------------|-------------|--------------------------------------------|
+| id          | Auto-ID     | Unique ID                                  |
+| title       | String      | Title of info or alert                     |
+| type        | Enum        | govt_scheme / disaster_alert / general_info |
+| content     | Text        | Description / instructions                 |
+| source      | Enum        | govt / NGO                                 |
+| created_at  | Timestamp   | Date of creation                           |
+| valid_till  | Timestamp   | Expiry for alerts                           |
+
+### chats (Firebase)
+| Field           | Type        | Notes                                    |
+|-----------------|-------------|------------------------------------------|
+| chat_id         | Auto-ID     | Unique chat thread                        |
+| user_id         | UUID        | Optional, can be anonymous               |
+| messages        | Array       | sender, timestamp, content               |
+| status          | Enum        | open / escalated_to_callcenter / closed  |
+| assigned_agent  | String      | Agent handling chat (nullable)           |
+
 ---
 
 ## 🚀 Roadmap
-- [ ] Complaint filing with offline queue  
-- [ ] SMS/WhatsApp fallback  
-- [ ] Status tracking dashboard  
-- [ ] NGO oversight & tamper-proof logs  
-- [ ] DigiLocker integration  
+- [ ] Phase 1: React Web MVP  
+  - Information Hub + Disaster Alerts  
+  - Complaint Module (offline + SMS/WhatsApp)  
+  - Chat & FAQ bot  
+  - Community discussion channels  
+  - Aadhaar verification + document upload (DigiLocker)  
+- [ ] Phase 2: Flutter Mobile App  
+  - Full mobile experience  
+  - Offline-first syncing  
+  - Push notifications + alerts  
+- [ ] Phase 3: AI-assisted genuineness & priority checking  
 
 ---
 
@@ -71,7 +146,7 @@ Screenshots / GIFs will be added after prototype build.
 ---
 
 ## 🤝 Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you’d like to change.  
+Pull requests are welcome. For major changes, open an issue first to discuss.  
 
 ---
 
