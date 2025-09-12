@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { authAPI } from '../../services/api';
-import { authStyles } from '../../styles/authStyles';
 
 const Login = ({ onSwitchToRegister }) => {
     const [step, setStep] = useState('phone');
@@ -50,13 +49,13 @@ const Login = ({ onSwitchToRegister }) => {
     };
 
     return (
-        <div style={authStyles.authContainer}>
-            <h2 style={authStyles.authTitle}>Welcome Back</h2>
+        <div className="bg-white rounded-xl p-6 sm:p-8 lg:p-10 w-full max-w-md shadow-2xl border border-gray-100">
+            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-8">Welcome Back</h2>
 
             {step === 'phone' && (
-                <form style={authStyles.form} onSubmit={handlePhoneSubmit}>
-                    <div style={authStyles.formField}>
-                        <label style={authStyles.label}>Phone Number</label>
+                <form className="space-y-6" onSubmit={handlePhoneSubmit}>
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-600 uppercase tracking-wider">Phone Number</label>
                         <input
                             type="tel"
                             inputMode="numeric"
@@ -69,17 +68,18 @@ const Login = ({ onSwitchToRegister }) => {
                             placeholder="Enter your registered phone number"
                             maxLength="10"
                             required
-                            style={authStyles.input}
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-base"
                         />
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
-                        style={{
-                            ...authStyles.primaryButton,
-                            ...(loading ? authStyles.primaryButtonDisabled : {})
-                        }}
+                        className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-200 ${
+                            loading 
+                                ? 'bg-gray-400 cursor-not-allowed' 
+                                : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0'
+                        }`}
                     >
                         {loading ? 'Sending...' : 'Send Verification Code'}
                     </button>
@@ -87,16 +87,16 @@ const Login = ({ onSwitchToRegister }) => {
             )}
 
             {step === 'otp' && (
-                <div>
-                    <div style={authStyles.otpDisplayBox}>
-                        <p style={authStyles.otpTitle}>🔐 Prototype Mode</p>
-                        <div style={authStyles.otpValue}>{mockOTP}</div>
-                        <p style={authStyles.otpSubtext}>In production, this would be sent via SMS</p>
+                <div className="space-y-6">
+                    <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-5 text-center">
+                        <p className="text-lg font-semibold text-gray-700 mb-3">🔐 Prototype Mode</p>
+                        <div className="text-2xl font-bold text-blue-600 font-mono tracking-widest mb-2">{mockOTP}</div>
+                        <p className="text-sm text-gray-500">In production, this would be sent via SMS</p>
                     </div>
 
-                    <form style={authStyles.form} onSubmit={handleOTPSubmit}>
-                        <div style={authStyles.formField}>
-                            <label style={authStyles.label}>Verification Code</label>
+                    <form className="space-y-6" onSubmit={handleOTPSubmit}>
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-600 uppercase tracking-wider">Verification Code</label>
                             <input
                                 type="tel"
                                 inputMode="numeric"
@@ -109,17 +109,18 @@ const Login = ({ onSwitchToRegister }) => {
                                 placeholder="Enter 6-digit code"
                                 maxLength="6"
                                 required
-                                style={authStyles.input}
+                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-base"
                             />
                         </div>
 
                         <button
                             type="submit"
                             disabled={loading}
-                            style={{
-                                ...authStyles.successButton,
-                                ...(loading ? authStyles.primaryButtonDisabled : {})
-                            }}
+                            className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-200 ${
+                                loading 
+                                    ? 'bg-gray-400 cursor-not-allowed' 
+                                    : 'bg-green-600 hover:bg-green-700 hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0'
+                            }`}
                         >
                             {loading ? 'Signing in...' : 'Complete Sign In'}
                         </button>
@@ -128,18 +129,19 @@ const Login = ({ onSwitchToRegister }) => {
             )}
 
             {message && (
-                <div style={{
-                    ...authStyles.messageBox,
-                    ...(message.includes('successful') ? authStyles.successMessage : authStyles.errorMessage)
-                }}>
+                <div className={`mt-6 p-4 rounded-lg font-medium text-sm ${
+                    message.includes('successful') 
+                        ? 'bg-green-50 border-2 border-green-200 text-green-800' 
+                        : 'bg-red-50 border-2 border-red-200 text-red-800'
+                }`}>
                     {message}
                 </div>
             )}
 
-            <div style={authStyles.switchAuth}>
+            <div className="text-center mt-6 text-gray-600">
                 <p>Don't have an account? <button 
                     onClick={onSwitchToRegister}
-                    style={authStyles.switchAuthButton}
+                    className="text-blue-600 hover:text-blue-800 font-semibold underline transition-colors duration-200"
                 >Create account</button></p>
             </div>
         </div>
