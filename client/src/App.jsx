@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AuthContainer from './components/Auth/AuthContainer';
 import Dashboard from './components/Dashboard';
+import { authStyles } from './styles/authStyles';
 
 function App() {
   return (
@@ -9,20 +10,20 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={
-            <>
-              <header style={{ backgroundColor: '#007bff', color: 'white', padding: '20px', textAlign: 'center' }}>
-                <h1>CivicSecure - Prototype</h1>
-                <p>Authentication System Demo</p>
+            <div style={authStyles.authPageContainer}>
+              <header style={authStyles.header}>
+                <h1 style={authStyles.headerTitle}>CivicSecure</h1>
+                <p style={authStyles.headerSubtitle}>Secure Digital Identity Platform</p>
               </header>
 
-              <main>
+              <main style={authStyles.mainContent}>
                 <AuthContainer />
               </main>
 
-              <footer style={{ textAlign: 'center', padding: '20px', marginTop: '50px', borderTop: '1px solid #eee' }}>
-                <p><strong>Prototype Mode:</strong> This is a demonstration version with mock authentication</p>
+              <footer style={authStyles.footer}>
+                <p><strong>🚧 Prototype Mode:</strong> This is a demonstration version with mock authentication</p>
               </footer>
-            </>
+            </div>
           } />
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>

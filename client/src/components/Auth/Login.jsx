@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { authAPI } from '../../services/api';
+import { authStyles } from '../../styles/authStyles';
 
 const Login = ({ onSwitchToRegister }) => {
-    const [step, setStep] = useState('phone'); // 'phone' or 'otp'
+    const [step, setStep] = useState('phone');
     const [formData, setFormData] = useState({
         phoneNumber: '',
         otp: ''
@@ -49,62 +50,78 @@ const Login = ({ onSwitchToRegister }) => {
     };
 
     return (
-        <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-            <h2>CivicSecure Login</h2>
+        <div style={authStyles.authContainer}>
+            <h2 style={authStyles.authTitle}>Welcome Back</h2>
 
             {step === 'phone' && (
-                <form onSubmit={handlePhoneSubmit}>
-                    <div style={{ marginBottom: '15px' }}>
-                        <label>Phone Number:</label>
+                <form style={authStyles.form} onSubmit={handlePhoneSubmit}>
+                    <div style={authStyles.formField}>
+                        <label style={authStyles.label}>Phone Number</label>
                         <input
-                            type="text"
+                            type="tel"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             value={formData.phoneNumber}
-                            onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                            placeholder="Enter 10-digit phone number"
+                            onChange={(e) => {
+                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                setFormData({ ...formData, phoneNumber: value });
+                            }}
+                            placeholder="Enter your registered phone number"
                             maxLength="10"
                             required
-                            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+                            style={authStyles.input}
                         />
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
-                        style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px' }}
+                        style={{
+                            ...authStyles.primaryButton,
+                            ...(loading ? authStyles.primaryButtonDisabled : {})
+                        }}
                     >
-                        {loading ? 'Sending...' : 'Send Login OTP'}
+                        {loading ? 'Sending...' : 'Send Verification Code'}
                     </button>
                 </form>
             )}
 
             {step === 'otp' && (
                 <div>
-                    <div style={{ backgroundColor: '#f8f9fa', padding: '15px', marginBottom: '15px', borderRadius: '4px' }}>
-                        <p><strong>Prototype Mode:</strong></p>
-                        <p>Mock OTP: <strong>{mockOTP}</strong></p>
-                        <p><small>In production, this would be sent via SMS</small></p>
+                    <div style={authStyles.otpDisplayBox}>
+                        <p style={authStyles.otpTitle}>🔐 Prototype Mode</p>
+                        <div style={authStyles.otpValue}>{mockOTP}</div>
+                        <p style={authStyles.otpSubtext}>In production, this would be sent via SMS</p>
                     </div>
 
-                    <form onSubmit={handleOTPSubmit}>
-                        <div style={{ marginBottom: '15px' }}>
-                            <label>Enter OTP:</label>
+                    <form style={authStyles.form} onSubmit={handleOTPSubmit}>
+                        <div style={authStyles.formField}>
+                            <label style={authStyles.label}>Verification Code</label>
                             <input
-                                type="text"
+                                type="tel"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 value={formData.otp}
-                                onChange={(e) => setFormData({ ...formData, otp: e.target.value })}
-                                placeholder="Enter 6-digit OTP"
+                                onChange={(e) => {
+                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                    setFormData({ ...formData, otp: value });
+                                }}
+                                placeholder="Enter 6-digit code"
                                 maxLength="6"
                                 required
-                                style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+                                style={authStyles.input}
                             />
                         </div>
 
                         <button
                             type="submit"
                             disabled={loading}
-                            style={{ width: '100%', padding: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px' }}
+                            style={{
+                                ...authStyles.successButton,
+                                ...(loading ? authStyles.primaryButtonDisabled : {})
+                            }}
                         >
-                            {loading ? 'Verifying...' : 'Verify & Login'}
+                            {loading ? 'Signing in...' : 'Complete Sign In'}
                         </button>
                     </form>
                 </div>
@@ -112,22 +129,18 @@ const Login = ({ onSwitchToRegister }) => {
 
             {message && (
                 <div style={{
-                    marginTop: '15px',
-                    padding: '10px',
-                    backgroundColor: message.includes('successful') ? '#d4edda' : '#f8d7da',
-                    border: `1px solid ${message.includes('successful') ? '#c3e6cb' : '#f5c6cb'}`,
-                    borderRadius: '4px',
-                    color: message.includes('successful') ? '#155724' : '#721c24'
+                    ...authStyles.messageBox,
+                    ...(message.includes('successful') ? authStyles.successMessage : authStyles.errorMessage)
                 }}>
                     {message}
                 </div>
             )}
 
-            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <div style={authStyles.switchAuth}>
                 <p>Don't have an account? <button 
                     onClick={onSwitchToRegister}
-                    style={{ color: '#007bff', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}
-                >Register here</button></p>
+                    style={authStyles.switchAuthButton}
+                >Create account</button></p>
             </div>
         </div>
     );
