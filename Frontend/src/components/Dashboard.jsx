@@ -424,6 +424,31 @@ function Dashboard({ toggleTheme, theme, setCurrentPage, currentPage }) {
     setShowOtpExpired(false);
   };
 
+  const handleStartOver = () => {
+    setVerificationStep('form');
+    setFormData({ aadhaarNumber: '', phoneNumber: '', otp: '' });
+    clearAllErrors();
+    setDevOTP('');
+    setOtpTimer(300);
+    setResendCooldown(60);
+    setShowOtpExpired(false);
+    if (otpIntervalRef.current) {
+      clearInterval(otpIntervalRef.current);
+      otpIntervalRef.current = null;
+    }
+    if (resendIntervalRef.current) {
+      clearInterval(resendIntervalRef.current);
+      resendIntervalRef.current = null;
+    }
+  };
+
+  const handleVerifyDifferent = () => {
+    clearVerificationStatus();
+    setVerificationStep('form');
+    setFormData({ aadhaarNumber: '', phoneNumber: '', otp: '' });
+    clearAllErrors();
+  };
+
   // Enhanced styling based on validation state
   const getInputStyle = (field) => {
     const value = formData[field];
@@ -778,92 +803,295 @@ function Dashboard({ toggleTheme, theme, setCurrentPage, currentPage }) {
   }
 
   return (
-    <div className="min-h-screen bg-base-100 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-          <div className="flex-1">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-700 dark:text-gray-400 mb-2">Dashboard</h1>
-            <p className="text-green-700 dark:text-green-400 text-base sm:text-lg">Welcome back! Here's your complaint overview</p>
-          </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <button
-              className="btn btn-success btn-sm sm:btn-md lg:btn-lg flex items-center justify-center gap-2 order-2 sm:order-1"
-              onClick={() => setCurrentPage("file-complaint")}
-            >
-              <FaPlus className="text-sm" />
-              <span className="hidden sm:inline">New Complaint</span>
-              <span className="sm:hidden">New</span>
-            </button>
-            <button
-              onClick={toggleTheme}
-              aria-label="Toggle dark mode"
-              className="btn btn-outline btn-success btn-sm sm:btn-md lg:btn-lg flex items-center justify-center order-1 sm:order-2"
-              title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-            >
-              {theme === "light" ? <FaMoon className="text-sm" /> : <FaSun className="text-sm" />}
-            </button>
+    <div className="w-full">
+      {/* Aadhaar Verification Section */}
+      {currentPage === "aadhaar-verify" && (
+        <div className="mb-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center mb-6">
+              <FaIdCard className="text-3xl text-green-600 mr-3" />
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200">
+                Aadhaar Verification
+              </h1>
+            </div>
+            
+            {verificationStep === "form" && !isVerified && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Verify Your Aadhaar</h2>
+                <form onSubmit={handleSendOTP} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Aadhaar Number
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.aadhaarNumber}
+                      onChange={(e) => handleInputChange('aadhaarNumber', e.target.value)}
+                      placeholder="Enter your 12-digit Aadhaar number"
+                      className={`input input-bordered w-full max-w-md ${aadhaarError ? 'input-error' : ''}`}
+                      maxLength={12}
+                      required
+                    />
+                    {aadhaarError && (
+                      <p className="text-red-600 dark:text-red-400 text-sm mt-1">{aadhaarError}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      value={formData.phoneNumber}
+                      onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                      placeholder="Enter your 10-digit phone number"
+                      className={`input input-bordered w-full max-w-md ${phoneError ? 'input-error' : ''}`}
+                      maxLength={10}
+                      required
+                    />
+                    {phoneError && (
+                      <p className="text-red-600 dark:text-red-400 text-sm mt-1">{phoneError}</p>
+                    )}
+                  </div>
+                  {generalError && (
+                    <div className="alert alert-error">
+                      <FaExclamationTriangle className="h-6 w-6" />
+                      <span>{generalError}</span>
+                    </div>
+                  )}
+                  <button 
+                    type="submit" 
+                    className={`btn btn-success ${loading ? 'loading' : ''}`}
+                    disabled={loading}
+                  >
+                    {loading ? <FaSpinner className="animate-spin mr-2" /> : null}
+                    {loading ? 'Sending OTP...' : 'Send OTP'}
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {verificationStep === "otp" && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Enter OTP</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  OTP has been sent to {formData.phoneNumber.replace(/(\d{6})(\d{4})/, '******$2')}
+                </p>
+                {devOTP && (
+                  <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg mb-4 border border-blue-200 dark:border-blue-700">
+                    <p className="text-blue-700 dark:text-blue-300 text-sm font-medium">
+                      Development OTP: <span className="font-mono text-lg">{devOTP}</span>
+                    </p>
+                  </div>
+                )}
+                <form onSubmit={handleVerifyOTP} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      OTP
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.otp}
+                      onChange={(e) => handleInputChange('otp', e.target.value)}
+                      placeholder="Enter 6-digit OTP"
+                      className={`input input-bordered w-full max-w-md ${otpError ? 'input-error' : ''}`}
+                      maxLength={6}
+                      required
+                    />
+                    {otpError && (
+                      <p className="text-red-600 dark:text-red-400 text-sm mt-1">{otpError}</p>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                    {otpTimer > 0 ? (
+                      <span>Resend OTP in {Math.floor(otpTimer / 60)}:{(otpTimer % 60).toString().padStart(2, '0')}</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleResendOTP}
+                        className="btn btn-link btn-sm p-0"
+                        disabled={resendCooldown > 0}
+                      >
+                        {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
+                      </button>
+                    )}
+                  </div>
+                  
+                  {showOtpExpired && (
+                    <div className="alert alert-warning">
+                      <FaClock className="h-6 w-6" />
+                      <span>OTP has expired. Please request a new one.</span>
+                    </div>
+                  )}
+                  
+                  {generalError && (
+                    <div className="alert alert-error">
+                      <FaExclamationTriangle className="h-6 w-6" />
+                      <span>{generalError}</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex gap-4">
+                    <button 
+                      type="submit" 
+                      className={`btn btn-success ${loading ? 'loading' : ''}`}
+                      disabled={loading || showOtpExpired}
+                    >
+                      {loading ? <FaSpinner className="animate-spin mr-2" /> : null}
+                      {loading ? 'Verifying...' : 'Verify OTP'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleStartOver}
+                      className="btn btn-outline"
+                    >
+                      <FaArrowLeft className="mr-2" />
+                      Start Over
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {(verificationStep === "success" || isVerified) && (
+              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-6 border border-green-200 dark:border-green-700">
+                <div className="flex items-center mb-4">
+                  <FaCheckCircle className="text-green-600 text-2xl mr-3" />
+                  <h2 className="text-xl font-semibold text-green-800 dark:text-green-200">
+                    Aadhaar Successfully Verified
+                  </h2>
+                </div>
+                <div className="space-y-2 mb-4">
+                  <p className="text-green-700 dark:text-green-300">
+                    <strong>Aadhaar:</strong> {verifiedData.aadhaar || formData.aadhaarNumber}
+                  </p>
+                  <p className="text-green-700 dark:text-green-300">
+                    <strong>Phone:</strong> {verifiedData.phone || formData.phoneNumber}
+                  </p>
+                  <p className="text-green-700 dark:text-green-300 text-sm">
+                    <strong>Verified on:</strong> {new Date(verifiedData.timestamp || Date.now()).toLocaleString()}
+                  </p>
+                </div>
+                <button
+                  onClick={handleVerifyDifferent}
+                  className="btn btn-outline btn-success"
+                >
+                  <FaRedo className="mr-2" />
+                  Verify Different Number
+                </button>
+              </div>
+            )}
           </div>
         </div>
+      )}
 
-        {/* Stats Cards - Enhanced Responsive Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
-          {stats.map(({ label, value, icon: Icon, color }, i) => (
-            <div
-              key={i}
-              className="card bg-base-100 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200"
-            >
-              <div className="card-body p-4 lg:p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 dark:text-gray-200 truncate">{value}</h3>
-                    <p className="text-sm lg:text-base font-semibold text-gray-600 dark:text-gray-400 mt-1 leading-tight">{label}</p>
-                  </div>
-                  <div className="flex-shrink-0 ml-3">
-                    <Icon className={`${color} text-3xl lg:text-4xl`} />
+      {/* Dashboard Content */}
+      {currentPage === "dashboard" && (
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-700 dark:text-gray-400 mb-2">
+                Dashboard
+              </h1>
+              <p className="text-green-700 dark:text-green-400 text-sm sm:text-base lg:text-lg">
+                Welcome back! Here's your complaint overview
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <button
+                className="btn btn-success btn-sm sm:btn-md flex items-center justify-center gap-2 order-2 sm:order-1"
+                onClick={() => setCurrentPage("file-complaint")}
+              >
+                <FaPlus className="text-sm" />
+                <span className="hidden sm:inline">New Complaint</span>
+                <span className="sm:hidden">New</span>
+              </button>
+              <button
+                onClick={toggleTheme}
+                aria-label="Toggle dark mode"
+                className="btn btn-outline btn-success btn-sm sm:btn-md flex items-center justify-center order-1 sm:order-2"
+                title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+              >
+                {theme === "light" ? <FaMoon className="text-sm" /> : <FaSun className="text-sm" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
+            {stats.map(({ label, value, icon: Icon, color }, i) => (
+              <div
+                key={i}
+                className="card bg-base-100 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200"
+              >
+                <div className="card-body p-4 lg:p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-800 dark:text-gray-200 truncate">
+                        {value}
+                      </h3>
+                      <p className="text-xs lg:text-sm xl:text-base font-semibold text-gray-600 dark:text-gray-400 mt-1 leading-tight">
+                        {label}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0 ml-3">
+                      <Icon className={`${color} text-2xl lg:text-3xl xl:text-4xl`} />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* Recent Complaints - Enhanced Layout */}
-        <div className="card bg-base-100 shadow-lg border border-gray-100 dark:border-gray-700">
-          <div className="card-body p-4 lg:p-6">
-            <h2 className="card-title text-xl lg:text-2xl mb-4 lg:mb-6 font-bold text-gray-800 dark:text-gray-200">Recent Complaints</h2>
-            <div className="overflow-x-auto">
-              <ul className="divide-y divide-gray-200 dark:divide-gray-600 min-w-full">
-                {recentComplaints.map(({ id, category, status, date }) => (
-                  <li key={id} className="py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-800 dark:text-gray-200 truncate">{id}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{category}</p>
-                    </div>
-                    <div className="flex items-center justify-between sm:justify-end sm:text-right gap-4">
-                      <span
-                        className={`badge badge-sm sm:badge-md font-medium ${
-                          status === "Resolved"
-                            ? "badge-success"
-                            : status === "Pending"
-                            ? "badge-warning"
-                            : "badge-info"
-                        }`}
-                      >
-                        {status}
-                      </span>
-                      <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">{date}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="card-actions justify-end mt-6">
-              <button className="btn btn-outline btn-success btn-sm sm:btn-md">View All</button>
+          {/* Recent Complaints */}
+          <div className="card bg-base-100 shadow-lg border border-gray-100 dark:border-gray-700">
+            <div className="card-body p-4 lg:p-6">
+              <h2 className="card-title text-lg lg:text-xl xl:text-2xl mb-4 lg:mb-6 font-bold text-gray-800 dark:text-gray-200">
+                Recent Complaints
+              </h2>
+              <div className="overflow-x-auto">
+                <ul className="divide-y divide-gray-200 dark:divide-gray-600 min-w-full">
+                  {recentComplaints.map(({ id, category, status, date }) => (
+                    <li key={id} className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-gray-800 dark:text-gray-200 truncate text-sm sm:text-base">
+                          {id}
+                        </p>
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {category}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between sm:justify-end sm:text-right gap-4">
+                        <span
+                          className={`badge badge-sm font-medium ${
+                            status === "Resolved"
+                              ? "badge-success"
+                              : status === "Pending"
+                              ? "badge-warning"
+                              : "badge-info"
+                          }`}
+                        >
+                          {status}
+                        </span>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                          {date}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="card-actions justify-end mt-4 lg:mt-6">
+                <button className="btn btn-outline btn-success btn-sm sm:btn-md">
+                  View All
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

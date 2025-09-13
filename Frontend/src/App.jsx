@@ -38,7 +38,7 @@ function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-base-100 text-base-content">
+    <div className="min-h-screen bg-base-100 text-base-content">
       {/* Sidebar */}
       <Sidebar
         currentPage={currentPage}
@@ -47,10 +47,18 @@ function App() {
         setSidebarOpen={setSidebarOpen}
       />
 
-      {/* Main content */}
-      <div className="flex flex-col flex-1">
+      {/* Overlay for mobile when sidebar is open */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Main content container */}
+      <div className="lg:ml-64">
         {/* Mobile navbar */}
-        <div className="navbar bg-white dark:bg-gray-900 shadow-sm px-4 sm:hidden">
+        <div className="navbar bg-white dark:bg-gray-900 shadow-sm px-4 lg:hidden">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="btn btn-square btn-ghost"
@@ -62,7 +70,7 @@ function App() {
         </div>
 
         {/* Page content */}
-        <main className="flex-grow p-8 overflow-auto">{renderContent()}</main>
+        <main className="p-4 sm:p-6 lg:p-8 min-h-screen">{renderContent()}</main>
       </div>
     </div>
   );
