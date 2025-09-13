@@ -20,13 +20,14 @@ function App() {
   const renderContent = () => {
     switch (currentPage) {
       case "dashboard":
-        return <Dashboard toggleTheme={toggleTheme} theme={theme} setCurrentPage={setCurrentPage} />;
+        return <Dashboard toggleTheme={toggleTheme} theme={theme} setCurrentPage={setCurrentPage} currentPage={currentPage} />;
       case "file-complaint":
         return <ComplaintForm />;
+      case "aadhaar-verify":
+        return <Dashboard toggleTheme={toggleTheme} theme={theme} setCurrentPage={setCurrentPage} currentPage={currentPage} />;
       case "track-status":
       case "info-hub":
       case "community":
-      case "aadhaar-verify":
       default:
         return (
           <div className="p-10 text-center text-gray-600 dark:text-gray-300 text-lg font-semibold">
