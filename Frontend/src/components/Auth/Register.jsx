@@ -1,72 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { validateAadhaarNumber, verhoeffValidate, validTestNumbers } from '../../utils/verhoeff';
+import { generateSecureOTP, validateOTP, validatePhoneNumber, formatTime, isDev } from '../../utils/otp';
 
-// Verhoeff algorithm for Aadhaar checksum validation (official implementation)
-const verhoeffValidate = (aadhaar) => {
-    if (!/^\d{12}$/.test(aadhaar)) return false;
-
-    // Official Verhoeff algorithm multiplication table
-    const d = [
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        [1, 2, 3, 4, 0, 6, 7, 8, 9, 5],
-        [2, 3, 4, 0, 1, 7, 8, 9, 5, 6],
-        [3, 4, 0, 1, 2, 8, 9, 5, 6, 7],
-        [4, 0, 1, 2, 3, 9, 5, 6, 7, 8],
-        [5, 9, 8, 7, 6, 0, 4, 3, 2, 1],
-        [6, 5, 9, 8, 7, 1, 0, 4, 3, 2],
-        [7, 6, 5, 9, 8, 2, 1, 0, 4, 3],
-        [8, 7, 6, 5, 9, 3, 2, 1, 0, 4],
-        [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-    ];
-
-    // Official Verhoeff algorithm permutation table
-    const p = [
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        [1, 5, 7, 6, 2, 8, 3, 0, 9, 4],
-        [5, 8, 0, 3, 7, 9, 6, 1, 4, 2],
-        [8, 9, 1, 6, 0, 4, 3, 5, 2, 7],
-        [9, 4, 5, 3, 1, 2, 6, 8, 7, 0],
-        [4, 2, 8, 6, 5, 7, 3, 9, 0, 1],
-        [2, 7, 9, 3, 8, 0, 6, 4, 1, 5],
-        [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]
-    ];
-
-    let c = 0;
-    const arr = aadhaar.split('').map(Number).reverse();
-
-    for (let i = 0; i < arr.length; i++) {
-        c = d[c][p[i % 8][arr[i]]];
-    }
-
-    return c === 0;
-};
-
-const isDev = import.meta.env.MODE === 'development';
-
-// Pre-calculated valid test Aadhaar numbers for development (these pass Verhoeff validation)
-const validTestNumbers = [
-    '123456789010',  // Valid checksum
-    '234567890124',  // Valid checksum  
-    '345678901238',  // Valid checksum
-    '784568755807',  // Valid checksum (the one that worked)
-    '456789012341',  // Valid checksum
-    '567890123458'   // Valid checksum
-];
-
-// Helper function to generate secure 6-digit OTP
-const generateOtp = () => {
-    if (window.crypto && window.crypto.getRandomValues) {
-        // Use crypto.getRandomValues for secure random number generation
-        const array = new Uint32Array(1);
-        window.crypto.getRandomValues(array);
-        const otp = (array[0] % 1000000).toString().padStart(6, '0');
-        return otp;
-    } else {
-        // Fallback to Math.random (less secure but compatible)
-        const otp = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
-        return otp;
-    }
-};
-
+// Register component with Aadhaar verification
 const Register = ({ onSwitchToLogin }) => {
     const [step, setStep] = useState('details');
     const [formData, setFormData] = useState({
@@ -149,7 +85,7 @@ const Register = ({ onSwitchToLogin }) => {
 
         try {
             // Generate client-side OTP for prototype
-            const newOtp = generateOtp();
+            const newOtp = generateSecureOTP();
             setDevOTP(newOtp);
             setStep('otp');
             setOtpTimer(300); // 5 minutes
@@ -220,7 +156,7 @@ const Register = ({ onSwitchToLogin }) => {
 
         try {
             // Generate fresh OTP for prototype
-            const newOtp = generateOtp();
+            const newOtp = generateSecureOTP();
             setDevOTP(newOtp);
             setOtpTimer(300); // Reset to 5 minutes
             setResendCooldown(60); // Reset cooldown to 1 minute
