@@ -1,7 +1,7 @@
 import express from 'express';
 import {
     startRegistration,
-    verifyOTP,
+    verifyRegistrationOTP,
     login,
     verifyLoginOTP,
     getProfile
@@ -12,7 +12,7 @@ const router = express.Router();
 
 // Registration routes
 router.post('/register', startRegistration);
-router.post('/verify-otp', verifyOTP);
+router.post('/verify-otp', verifyRegistrationOTP);
 
 // Login routes
 router.post('/login', login);
