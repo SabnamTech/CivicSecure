@@ -1,0 +1,157 @@
+/* General Styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-image: url('/Images/Featured-Image-Live-Weather-Wallpapers-Android.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* App Container */
+#app-container {
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 800px;
+  width: 100%;
+  margin: 20px;
+}
+
+/* Heading Styles */
+h1, h2 {
+  color: white;
+  margin-bottom: 15px;
+}
+
+/* Search Box */
+.search-box {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+input[type="text"] {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  width: 60%;
+  margin-right: 10px;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.5);
+  color: black;
+}
+
+input[type="text"]::placeholder {
+  color: white;
+  opacity: 1;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Weather Box */
+.weather-box {
+  display: inline-block;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  width: 120px;
+  margin: 10px;
+}
+
+/* Current Weather */
+.current-weather {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+/* 3-Day Forecast */
+.forecast-container {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 30px;
+}
+
+.forecast-box {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  width: 25%;
+  text-align: center;
+}
+
+.forecast-box h3 {
+  margin-top: 0;
+}
+
+.forecast-box p {
+  margin: 5px 0;
+}
+
+.forecast-box i {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+/* Icon Styling */
+img.weather-icon {
+  width: 50px;
+  height: 50px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .search-box {
+      flex-direction: column;
+      align-items: center;
+  }
+
+  input[type="text"] {
+      width: 80%;
+      margin-bottom: 10px;
+  }
+
+  button {
+      width: 80%;
+  }
+
+  .forecast-container {
+      flex-direction: column;
+      align-items: center;
+  }
+
+  .forecast-box {
+      width: 80%;
+      margin: 10px 0;
+  }
+
+  .current-weather {
+      flex-direction: column;
+  }
+
+  .weather-box {
+      width: 80%;
+      margin: 10px 0;
+  }
+}
