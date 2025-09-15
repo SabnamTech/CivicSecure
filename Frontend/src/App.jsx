@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
 import ComplaintForm from "./components/ComplaintForm";
+import InfoHub from "./components/InfoHub";  // <-- import your InfoHub component
 import { FaBars } from "react-icons/fa";
 
 function App() {
@@ -20,13 +21,28 @@ function App() {
   const renderContent = () => {
     switch (currentPage) {
       case "dashboard":
-        return <Dashboard toggleTheme={toggleTheme} theme={theme} setCurrentPage={setCurrentPage} currentPage={currentPage} />;
+        return (
+          <Dashboard
+            toggleTheme={toggleTheme}
+            theme={theme}
+            setCurrentPage={setCurrentPage}
+            currentPage={currentPage}
+          />
+        );
       case "file-complaint":
         return <ComplaintForm />;
-      case "aadhaar-verify":
-        return <Dashboard toggleTheme={toggleTheme} theme={theme} setCurrentPage={setCurrentPage} currentPage={currentPage} />;
-      case "track-status":
       case "info-hub":
+        return <InfoHub />;      // <-- Render InfoHub here
+      case "aadhaar-verify":
+        return (
+          <Dashboard
+            toggleTheme={toggleTheme}
+            theme={theme}
+            setCurrentPage={setCurrentPage}
+            currentPage={currentPage}
+          />
+        );
+      case "track-status":
       case "community":
       default:
         return (
@@ -49,7 +65,7 @@ function App() {
 
       {/* Overlay for mobile when sidebar is open */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -66,7 +82,9 @@ function App() {
           >
             <FaBars className="text-xl" />
           </button>
-          <h1 className="text-xl font-bold text-green-800 dark:text-green-400 ml-3">CivicSecure</h1>
+          <h1 className="text-xl font-bold text-green-800 dark:text-green-400 ml-3">
+            CivicSecure
+          </h1>
         </div>
 
         {/* Page content */}
